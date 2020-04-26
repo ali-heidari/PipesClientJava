@@ -1,10 +1,5 @@
 package com.elpixeler.pipesclient;
 
-import java.net.URISyntaxException;
-
-import io.socket.client.IO;
-import io.socket.client.Socket;
-import io.socket.emitter.Emitter;
 
 /**
  * Hello world!
