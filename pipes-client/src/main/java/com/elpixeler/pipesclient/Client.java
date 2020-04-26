@@ -24,7 +24,6 @@ import io.socket.client.IO;
 import io.socket.client.Manager;
 import io.socket.emitter.Emitter;
 import io.socket.engineio.client.Transport;
-import io.socket.engineio.client.transports.Polling;
 
 public abstract class Client {
     private String _name;
@@ -43,33 +42,10 @@ public abstract class Client {
         Options options = new Options();
         options.query = "name=" + this._name;
 
-        // options.transports = new String[] { Polling.NAME };
-        // Options pullingOptions = new Options();
-        // pullingOptions.query = "authorization=" + token;
-        // options.transportOptions = new HashMap<>();
-        // options.transportOptions.put("extraHeaders", options);
-
-        // options.transports = new String[] { Polling.NAME };
-        // options.query.put("authorization", token);
         Socket socket = IO.socket("http://localhost:3000", options);
 
         // Called upon transport creation.
-        socket.io().on(Manager.EVENT_TRANSPORT, new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                Transport transport = (Transport) args[0];
-
-                transport.on(Transport.EVENT_REQUEST_HEADERS, new Emitter.Listener() {
-                    @Override
-                    public void call(Object... args) {
-                        @SuppressWarnings("unchecked")
-                        Map<String, List<String>> headers = (Map<String, List<String>>) args[0];
-                        // modify request headers
-                        headers.put("authorization", Arrays.asList(token));
-                    }
-                });
-            }
-        });
+        socket.addHeader("authorization", token);
 
         socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
 
