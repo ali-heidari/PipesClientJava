@@ -17,7 +17,6 @@ public final class App {
         try {
             Client c=new ClientApp();
         } catch (Exception e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
