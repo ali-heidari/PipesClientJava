@@ -6,6 +6,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Map;
 
 import io.socket.client.IO;
 import io.socket.client.IO.Options;
@@ -16,7 +19,9 @@ import io.socket.emitter.Emitter;
  * Abstract class for client apps and services to connect PipesHub server
  */
 public abstract class Client {
+    // Fields
     private String _name;
+    private Socket socket;
 
     public Client(String name) throws Exception {
         this._name = name;
@@ -26,6 +31,7 @@ public abstract class Client {
 
     /**
      * Establish a socket connection to server after receiving token
+     * 
      * @throws Exception Throws an exception if no token received.
      */
     private void establishConnection() throws Exception {
@@ -33,12 +39,12 @@ public abstract class Client {
         if (token.isEmpty())
             throw new Exception("No token received.");
 
-        // Set app name as query    
+        // Set app name as query
         Options options = new Options();
         options.query = "name=" + this._name;
 
         // Create socket to the server address
-        Socket socket = IO.socket("http://localhost:3000", options);
+        socket = IO.socket("http://localhost:3000", options);
 
         // Send token through headers
         socket.addHeader("authorization", token);
@@ -49,34 +55,33 @@ public abstract class Client {
             @Override
             public void call(Object... args) {
                 System.out.println("EVENT_CONNECT");
-                socket.emit("foo", "hi");
-                socket.disconnect();
             }
 
         })
-        // On gateway event
-        .on("gateway", new Emitter.Listener() {
+                // On gateway event
+                .on("gateway", new Emitter.Listener() {
 
-            @Override
-            public void call(Object... args) {
-                System.out.println("event");
-            }
+                    @Override
+                    public void call(Object... args) {
+                        System.out.println(args);
+                    }
 
-        })
-        // On disconnect event
-        .on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
+                })
+                // On disconnect event
+                .on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
 
-            @Override
-            public void call(Object... args) {
-                System.out.println("EVENT_DISCONNECT");
-            }
+                    @Override
+                    public void call(Object... args) {
+                        System.out.println("EVENT_DISCONNECT");
+                    }
 
-        });
+                });
         socket.connect();
     }
 
     /**
      * Get token from server
+     * 
      * @return Return token or response message in case of error
      * @throws IOException Throws exception if connection fail
      */
@@ -86,7 +91,8 @@ public abstract class Client {
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setDoOutput(true);
         connection.setRequestMethod("POST");
-        // Send validation key inside body request. Currently a test username, will change
+        // Send validation key inside body request. Currently a test username, will
+        // change
         try (OutputStream stream = connection.getOutputStream()) {
             stream.write("name=guest".getBytes("utf8"));
         }
@@ -101,5 +107,18 @@ public abstract class Client {
         }
         // Return response message which is server message why token did not send
         return connection.getResponseMessage();
+    }
+
+    public void ask(String unitId, String operation, Map<String, Object> input) {
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("senderId", this._name);
+        data.put("receiverId", unitId);
+        data.put("operation", operation);
+        data.put("input", input);
+        data.put("awaiting", true);
+        socket.emit("gateway", data);
+        // socket.on('responseGateway', function (data) {
+        // resolve(data);
+        // });
     }
 }

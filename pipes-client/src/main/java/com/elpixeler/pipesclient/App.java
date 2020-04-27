@@ -1,5 +1,7 @@
 package com.elpixeler.pipesclient;
 
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Hello world!
@@ -15,7 +17,13 @@ public final class App {
      */
     public static void main(String[] args) {
         try {
-            Client c=new ClientApp();
+            Client ca = new ClientApp();
+            Client cs = new ClientService();
+
+            Map<String, Object> input = new HashMap<>();
+            input.put("a", 6);
+            input.put("b", 2);
+            ca.ask("cService", "sum", input);
         } catch (Exception e) {
             e.printStackTrace();
         }
