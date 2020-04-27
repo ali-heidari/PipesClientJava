@@ -18,10 +18,10 @@ public final class App {
     public static void main(String[] args) {
         try {
             Client ca = new ClientApp();
-            Client cs = new ClientService();
+            // Client cs = new ClientService();
 
-            cs.add("sum",
-                    data -> Integer.valueOf(data.get("a").toString()) + Integer.valueOf(data.get("b").toString()));
+            // cs.add("sum",
+            //         data -> Integer.valueOf(data.get("a").toString()) + Integer.valueOf(data.get("b").toString()));
 
             Map<String, Object> input = new HashMap<>();
             input.put("a", 6);

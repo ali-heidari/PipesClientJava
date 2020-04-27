@@ -139,9 +139,9 @@ public abstract class Client {
         data.put("input", input);
         data.put("awaiting", true);
         socket.emit("gateway", data);
-        // socket.on('responseGateway', function (data) {
-        // resolve(data);
-        // });
+        socket.on("responseGateway", args -> {
+            System.out.println(args);
+        });
     }
 
     /**
