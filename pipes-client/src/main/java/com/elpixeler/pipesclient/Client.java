@@ -23,6 +23,8 @@ public abstract class Client {
     private String _name;
     private Socket socket;
 
+    private Map<String, Handler> __pipes__;
+
     public Client(String name) throws Exception {
         this._name = name;
 
@@ -144,5 +146,19 @@ public abstract class Client {
         data.put("input", input);
         data.put("awaiting", false);
         socket.emit("gateway", data);
+    }
+
+    /**
+     * Add a function to global __pipes prototype
+     * 
+     * @param {*} funcName A name for operation
+     * @param {*} handler Operation body
+     * @throws Exception
+     */
+    public void add(String funcName, Handler handler) throws Exception {
+        if (__pipes__.containsKey(funcName)) {
+            throw new Exception("This function already exists.");
+        }
+        __pipes__.put(funcName, handler);
     }
 }

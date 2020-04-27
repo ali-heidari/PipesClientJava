@@ -20,6 +20,9 @@ public final class App {
             Client ca = new ClientApp();
             Client cs = new ClientService();
 
+            cs.add("sum",
+                    data -> Integer.valueOf(data.get("a").toString()) + Integer.valueOf(data.get("b").toString()));
+
             Map<String, Object> input = new HashMap<>();
             input.put("a", 6);
             input.put("b", 2);
