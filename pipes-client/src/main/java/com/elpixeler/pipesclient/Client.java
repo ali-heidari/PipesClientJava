@@ -10,6 +10,8 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.json.JSONObject;
+
 import io.socket.client.IO;
 import io.socket.client.IO.Options;
 import io.socket.client.Socket;
@@ -23,7 +25,7 @@ public abstract class Client {
     private String _name;
     private Socket socket;
 
-    private Map<String, Handler> __pipes__;
+    private Map<String, Handler> __pipes__ = new HashMap<>();
 
     public Client(String name) throws Exception {
         this._name = name;
@@ -65,7 +67,18 @@ public abstract class Client {
 
                     @Override
                     public void call(Object... args) {
-                        System.out.println(args);
+                        System.out.println(args[0].toString());
+                        Map<String, Object> data;
+                        if (args.length > 0 && args[0].getClass().equals(JSONObject.class)) {
+                            data = (HashMap<String, Object>) args[0];
+                            if (data.get("receiverId") != Client.this._name)
+                                data.put("res", "I am not who you looking for :)");
+                            else
+                                data.put("res", __pipes__.get(data.get("operation"))
+                                        .run((HashMap<String, Object>) data.get("input")));
+                            if (Boolean.getBoolean(data.get("awaiting").toString()))
+                                socket.emit("responseGateway", data);
+                        }
                     }
 
                 })
