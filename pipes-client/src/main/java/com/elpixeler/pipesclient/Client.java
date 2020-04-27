@@ -109,6 +109,13 @@ public abstract class Client {
         return connection.getResponseMessage();
     }
 
+    /**
+     * Send a request to other unit and delivers the result
+     * 
+     * @param {*} unitId The receiver unit id
+     * @param {*} operation Id or name of operation on other side
+     * @param {*} input Input data receiver needs to run operation
+     */
     public void ask(String unitId, String operation, Map<String, Object> input) {
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("senderId", this._name);
@@ -120,5 +127,22 @@ public abstract class Client {
         // socket.on('responseGateway', function (data) {
         // resolve(data);
         // });
+    }
+
+    /**
+     * Send a request to other unit and no result expected
+     * 
+     * @param {*} unitId The receiver unit id
+     * @param {*} operation Id or name of operation on other side
+     * @param {*} input Input data receiver needs to run operation
+     */
+    public void request(String unitId, String operation, Map<String, Object> input) {
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("senderId", this._name);
+        data.put("receiverId", unitId);
+        data.put("operation", operation);
+        data.put("input", input);
+        data.put("awaiting", false);
+        socket.emit("gateway", data);
     }
 }
