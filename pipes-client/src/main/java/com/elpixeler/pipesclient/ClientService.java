@@ -6,6 +6,6 @@ package com.elpixeler.pipesclient;
 public class ClientService extends Client {
 
     public ClientService() throws Exception {
-        super("cService");
+        super("cServiceJAVA");
     }
 }
