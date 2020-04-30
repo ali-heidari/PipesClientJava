@@ -10,6 +10,8 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.gson.Gson;
+
 import org.json.JSONObject;
 
 import io.socket.client.IO;
@@ -140,7 +142,8 @@ public abstract class Client {
         data.put("awaiting", true);
         socket.emit("gateway", data);
         socket.on("responseGateway", args -> {
-            System.out.println(args);
+            Protocol p = new Gson().fromJson(args[0].toString(), Protocol.class);
+            System.out.println("Result is " + p.res);
         });
     }
 
