@@ -13,7 +13,9 @@ import java.util.Map;
 import com.google.gson.Gson;
 
 import org.json.JSONObject;
+import org.reactivestreams.Subscriber;
 
+import io.reactivex.rxjava3.core.Observable;
 import io.socket.client.IO;
 import io.socket.client.IO.Options;
 import io.socket.client.Socket;
@@ -133,17 +135,20 @@ public abstract class Client {
      * @param {*} operation Id or name of operation on other side
      * @param {*} input Input data receiver needs to run operation
      */
-    public void ask(String unitId, String operation, Map<String, Object> input) {
-        Map<String, Object> data = new HashMap<String, Object>();
-        data.put("senderId", this._name);
-        data.put("receiverId", unitId);
-        data.put("operation", operation);
-        data.put("input", input);
-        data.put("awaiting", true);
-        socket.emit("gateway", data);
-        socket.on("responseGateway", args -> {
-            Protocol p = new Gson().fromJson(args[0].toString(), Protocol.class);
-            System.out.println("Result is " + p.res);
+    public Observable<Protocol> ask(String unitId, String operation, Map<String, Object> input) {
+        return Observable.create(subscriber -> {
+            Map<String, Object> data = new HashMap<String, Object>();
+            data.put("senderId", this._name);
+            data.put("receiverId", unitId);
+            data.put("operation", operation);
+            data.put("input", input);
+            data.put("awaiting", true);
+            socket.emit("gateway", data);
+            socket.on("responseGateway", args -> {
+                Protocol p = new Gson().fromJson(args[0].toString(), Protocol.class);
+                subscriber.onNext(p);
+                subscriber.onComplete();
+            });
         });
     }
 
