@@ -147,7 +147,6 @@ public abstract class Client {
             socket.on("responseGateway", args -> {
                 Protocol p = new Gson().fromJson(args[0].toString(), Protocol.class);
                 subscriber.onNext(p);
-                subscriber.onComplete();
             });
         });
     }

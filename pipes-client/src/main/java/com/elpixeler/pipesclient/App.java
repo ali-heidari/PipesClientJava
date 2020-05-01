@@ -26,7 +26,17 @@ public final class App {
             Map<String, Object> input = new HashMap<>();
             input.put("a", 6);
             input.put("b", 2);
-            ca.ask("cService", "sum", input).subscribe(x->System.out.println("Result is "+ x.res));
+            ca.ask("cService", "sum", input).subscribe(x -> System.out.println("Result of sum is " + x.res));
+
+            input = new HashMap<>();
+            input.put("a", 555);
+            ca.request("cService", "add", input);
+
+            input = new HashMap<>();
+            input.put("a", "test");
+            ca.request("cService", "add", input);
+
+            ca.ask("cService", "list", null).subscribe(x -> System.out.println("Result is " + x.res));
         } catch (Exception e) {
             e.printStackTrace();
         }
