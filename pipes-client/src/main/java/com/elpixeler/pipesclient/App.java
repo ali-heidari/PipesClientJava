@@ -1,7 +1,9 @@
 package com.elpixeler.pipesclient;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * Hello world!
@@ -21,9 +23,15 @@ public final class App {
             Client cs = new ClientService();
 
             cs.add("sum", data -> {
-                // data.get("pushResponse")
-                //         .run(Integer.valueOf(data.get("a").toString()) + Integer.valueOf(data.get("b").toString()));
-                        return 1;
+                ((Consumer<Object>) data.get("pushResponse"))
+                        .accept(Double.valueOf(data.get("a").toString()) + Double.valueOf(data.get("b").toString()));
+                return true;
+            });
+            ArrayList<Object> theList = new ArrayList<>();
+            cs.add("add", data -> theList.add(data.get("a")));
+            cs.add("list", data -> {
+                ((Consumer<Object>) data.get("pushResponse")).accept(theList);
+                return true;
             });
 
             Map<String, Object> input = new HashMap<>();

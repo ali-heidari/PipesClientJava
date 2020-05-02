@@ -7,16 +7,15 @@ import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
 import com.google.gson.Gson;
+import com.google.gson.internal.LinkedTreeMap;
 import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONObject;
-import org.reactivestreams.Subscriber;
 
 import io.reactivex.rxjava3.core.Observable;
 import io.socket.client.IO;
@@ -28,7 +27,8 @@ import io.socket.emitter.Emitter;
  * Abstract class for client apps and services to connect PipesHub server
  */
 public abstract class Client {
-    private final static Type type = new TypeToken<HashMap<String, Object>>(){}.getType();
+    private final static Type type = new TypeToken<HashMap<String, Object>>() {
+    }.getType();
     // Fields
     private String _name;
     private Socket socket;
@@ -75,23 +75,27 @@ public abstract class Client {
 
                     @Override
                     public void call(Object... args) {
-                        System.out.println(args[0].toString());
                         Map<String, Object> data;
-                        if (args.length > 0 && args[0].getClass().equals(JSONObject.class)) {                            
+                        if (args.length > 0 && args[0].getClass().equals(JSONObject.class)) {
+
                             data = new Gson().fromJson(args[0].toString(), type);
-                            if (data.get("receiverId") != Client.this._name)
+
+                            if (!data.get("receiverId").toString().equals(getName()))
                                 data.put("res", "I am not who you looking for :)");
                             else {
-                                if (Boolean.getBoolean(data.get("awaiting").toString()))
+                                if (Boolean.valueOf(data.get("awaiting").toString()))
                                     if (!data.containsKey("input"))
                                         data.put("input", new HashMap<>());
 
-                                Consumer<HashMap<String, Object>> func = res -> {
+                                Consumer<Object> func = res -> {
                                     data.put("res", res);
                                     socket.emit("responseGateway", data);
                                 };
-                                ((HashMap<String, Object>) data.get("input")).put("pushResponse", func);
-                                __pipes__.get(data.get("operation")).run((HashMap<String, Object>) data.get("input"));
+                                LinkedTreeMap<String, Object> input = (LinkedTreeMap<String, Object>) data.get("input");
+                                if (input == null)
+                                    input = new LinkedTreeMap<String, Object>();
+                                input.put("pushResponse", func);
+                                __pipes__.get(data.get("operation")).run(input);
                             }
                         }
                     }
@@ -107,6 +111,15 @@ public abstract class Client {
 
                 });
         socket.connect();
+    }
+
+    /**
+     * Get name of client
+     * 
+     * @return name of client
+     */
+    public String getName() {
+        return _name;
     }
 
     /**

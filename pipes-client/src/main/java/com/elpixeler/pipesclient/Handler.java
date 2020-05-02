@@ -1,7 +1,7 @@
 package com.elpixeler.pipesclient;
 
-import java.util.HashMap;
+import com.google.gson.internal.LinkedTreeMap;
 
 public interface Handler {
-    public Object run(HashMap<String,Object> data);
+    public Object run(LinkedTreeMap<String,Object> data);
 }
