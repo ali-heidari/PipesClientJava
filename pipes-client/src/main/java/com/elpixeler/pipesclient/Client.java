@@ -176,6 +176,28 @@ public abstract class Client {
     }
 
     /**
+     * Send a request to other unit and delivers the result
+     * 
+     * @param {*} unitId The receiver unit id
+     * @param {*} operation Id or name of operation on other side
+     * @param {*} input Input data receiver needs to run operation
+     * @param {*} onResponse Called while new data received
+     */
+    public void persist(String unitId, String operation, Map<String, Object> input, Consumer<Protocol> onResponse) {
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("senderId", this._name);
+        data.put("receiverId", unitId);
+        data.put("operation", operation);
+        data.put("input", input);
+        data.put("awaiting", true);
+        socket.emit("gateway", data);
+        socket.on("responseGateway", args -> {
+            Protocol p = new Gson().fromJson(args[0].toString(), Protocol.class);
+            onResponse.accept(p);
+        });
+    }
+
+    /**
      * Send a request to other unit and no result expected
      * 
      * @param {*} unitId The receiver unit id
