@@ -1,8 +1,11 @@
 package com.elpixeler.pipesclient;
 
+import java.util.Date;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.function.Consumer;
 
 /**
@@ -34,6 +37,16 @@ public final class App {
                 return true;
             });
 
+            cs.add("message", data -> {
+                new Timer().schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        ((Consumer<Object>) data.get("pushResponse")).accept("Time is " + new Date());
+                    }
+                }, 0L, 5000L);
+                return true;
+            });
+
             Map<String, Object> input = new HashMap<>();
             input.put("a", 6);
             input.put("b", 2);
@@ -48,6 +61,8 @@ public final class App {
             ca.request("cServiceJAVA", "add", input);
 
             ca.ask("cServiceJAVA", "list", null).subscribe(x -> System.out.println("Result is " + x.res));
+
+            ca.persist("cServiceJAVA", "message", null, data -> System.out.println(data.res));
         } catch (Exception e) {
             e.printStackTrace();
         }
