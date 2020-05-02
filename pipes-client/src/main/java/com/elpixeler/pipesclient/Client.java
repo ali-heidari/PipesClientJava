@@ -75,7 +75,7 @@ public abstract class Client {
                         System.out.println(args[0].toString());
                         Map<String, Object> data;
                         if (args.length > 0 && args[0].getClass().equals(JSONObject.class)) {
-                            data = (HashMap<String, Object>) args[0];
+                            data = new Gson().fromJson(args[0].toString(), HashMap.class) ;
                             if (data.get("receiverId") != Client.this._name)
                                 data.put("res", "I am not who you looking for :)");
                             else {
