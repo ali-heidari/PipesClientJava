@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Dictionary;
@@ -12,6 +13,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONObject;
 import org.reactivestreams.Subscriber;
@@ -26,6 +28,7 @@ import io.socket.emitter.Emitter;
  * Abstract class for client apps and services to connect PipesHub server
  */
 public abstract class Client {
+    private final static Type type = new TypeToken<HashMap<String, Object>>(){}.getType();
     // Fields
     private String _name;
     private Socket socket;
@@ -74,8 +77,8 @@ public abstract class Client {
                     public void call(Object... args) {
                         System.out.println(args[0].toString());
                         Map<String, Object> data;
-                        if (args.length > 0 && args[0].getClass().equals(JSONObject.class)) {
-                            data = new Gson().fromJson(args[0].toString(), HashMap.class) ;
+                        if (args.length > 0 && args[0].getClass().equals(JSONObject.class)) {                            
+                            data = new Gson().fromJson(args[0].toString(), type);
                             if (data.get("receiverId") != Client.this._name)
                                 data.put("res", "I am not who you looking for :)");
                             else {
