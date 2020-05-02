@@ -9,6 +9,7 @@ import java.net.URL;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import com.google.gson.Gson;
 
@@ -77,11 +78,18 @@ public abstract class Client {
                             data = (HashMap<String, Object>) args[0];
                             if (data.get("receiverId") != Client.this._name)
                                 data.put("res", "I am not who you looking for :)");
-                            else
-                                data.put("res", __pipes__.get(data.get("operation"))
-                                        .run((HashMap<String, Object>) data.get("input")));
-                            if (Boolean.getBoolean(data.get("awaiting").toString()))
-                                socket.emit("responseGateway", data);
+                            else {
+                                if (Boolean.getBoolean(data.get("awaiting").toString()))
+                                    if (!data.containsKey("input"))
+                                        data.put("input", new HashMap<>());
+
+                                Consumer<HashMap<String, Object>> func = res -> {
+                                    data.put("res", res);
+                                    socket.emit("responseGateway", data);
+                                };
+                                ((HashMap<String, Object>) data.get("input")).put("pushResponse", func);
+                                __pipes__.get(data.get("operation")).run((HashMap<String, Object>) data.get("input"));
+                            }
                         }
                     }
 
